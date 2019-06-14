@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>解析抖音视频</title>
+	<script type="text/javascript" src="./jquery.js"></script>
+	<style type="text/css">
+		table tr td {
+			width: 100px;
+		}
+		img {
+			width: 50px;
+			height: 50px;
+		}
+	</style>
+</head>
+<body>
+	<input type="text" value="xiaosusu9117" placeholder="输入抖音号" id="uniq_id">
+	<input type="button" value="开始解析" id="btn">
+	<table id="data">
+		
+	</table>
+	<script type="text/javascript">
+		
+		$("#btn").click(function(){
+			num = 1;
+			$("#data").html("");
+			if(!$("#uniq_id").val()){
+				return alert('请先输入抖音号');
+			}
+			$.ajax({
+				type:"get",
+				url:"api.php?action=getjs&uniq_id="+$("#uniq_id").val(),
+				dataType:"script",
+				success:function(){
+					var url = "action=getlist&uid="+getuid()+"&dytk="+getdytk()+"&signature="+generateSignature(getuid())
+					$.ajax({
+						type:"get",
+						url:"api.php?"+url,
+						dataType:"json",
+						success:function(data){
+							if (data.aweme_list) {
+								$("#data").append("<tr><td>序号</td><td>描述信息</td><td>动图地址</td><td>视频地址</td></tr>");
+								for (var i = 0; i < data.aweme_list.length - 1; i++) {
+									$.ajax({
+										type:"get",
+										url:"api.php?action=getzUrl&url="+data.aweme_list[i]["video"]["play_addr"]["uri"]+"&desc="+data.aweme_list[i]["share_info"]["share_desc"]+"&img="+data.aweme_list[i]["video"]["dynamic_cover"]["url_list"][0],
+										dataType:"json",
+										success:function(msg){
+											$("#data").append("<tr><td>"+num+"</td><td>"+msg["desc"]+"</td><td><img src='"+msg["img"]+"'></td><td>"+msg["url"]+"</td></tr>");
+											num +=1;
+										}
+									})
+									
+								}
+
+										
+
+
+								
+							}
+						}
+					});
+				}
+			});
+		})
+	</script>
+</body>
+</html>
